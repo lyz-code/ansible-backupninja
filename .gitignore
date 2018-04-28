@@ -1,0 +1,3 @@
+molecule/default/.molecule
+test_default.pyc
+__pycache__
