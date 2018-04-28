@@ -1,0 +1,79 @@
+---
+# tasks file for backupninja
+- name: Check mandatory variables
+  fail:
+    msg: "Variable {{ item }} has a wrong configuration"
+  with_items:
+    - "{{ ninja.email_to_report | default([]) }}"
+
+    - "{{ ninja.backupname | default([]) }}"
+    - "{{ ninja.backupdir | default([]) }}"
+    - "{{ ninja.root_backupdir | default([]) }}"
+    - "{{ ninja.root_includes | default([]) }}"
+    - "{{ ninja.gpg_user | default([]) }}"
+    - "{{ ninja.shared_folder | default([]) }}"
+  when:
+    - item == ""
+
+- name: Install Backupninja
+  become: "True"
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - backupninja
+    - postfix
+
+- name: Install Backupninja sys mode related packages
+  become: "True"
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - hwinfo
+    - debconf-utils
+    - flashrom
+
+- name: Install Backupninja rdiff mode related packages
+  become: "True"
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - rdiff-backup
+
+- name: Create required directories
+  file:
+    name: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ ninja.backup_dir }}"
+    - "{{ ninja.temp_backup_dir }}"
+
+- name: Deploy config template
+  become: "True"
+  template:
+    src: backupninja.conf.j2
+    dest: "/etc/backupninja.conf"
+    mode: '0600'
+    owner: root
+    group: root
+
+- name: Deploy system info backup template
+  become: "True"
+  template:
+    src: sys.j2
+    dest: "/etc/backup.d/10.sys"
+    mode: '0600'
+    owner: root
+    group: root
+
+- name: Deploy directories backup template
+  become: "True"
+  template:
+    src: rdiff.j2
+    dest: "/etc/backup.d/20.rdiff"
+    mode: '0600'
+    owner: root
+    group: root
+  when: ninja.backup_method == 'rdiff'
