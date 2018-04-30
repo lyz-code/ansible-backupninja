@@ -20,6 +20,7 @@
         - "/tmp"
       temp_backup_dir: "/var/backups/"
       backup_dir: "/backups"
+      when: "everyday at 13"
   roles:
     - role: backupninja
 

@@ -37,6 +37,7 @@ def test_ninja_global_config(host):
     assert file.group == 'root'
     assert oct(file.mode) == '0600'
     assert file.contains('reportemail = lyz@gentooza.me')
+    assert file.contains('when = everyday at 13')
 
 
 def test_ninja_sys_backup_config(host):
