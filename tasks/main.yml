@@ -46,6 +46,7 @@
     - rdiff-backup
 
 - name: Create required directories
+  become: "True"
   file:
     name: "{{ item }}"
     state: directory
