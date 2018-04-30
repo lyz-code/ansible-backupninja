@@ -19,6 +19,7 @@
   become: "True"
   package:
     name: "{{ item }}"
+    use: "apt"
     state: present
   with_items:
     - backupninja
@@ -29,6 +30,7 @@
   package:
     name: "{{ item }}"
     state: present
+    use: "apt"
   with_items:
     - hwinfo
     - debconf-utils
@@ -39,6 +41,7 @@
   package:
     name: "{{ item }}"
     state: present
+    use: "apt"
   with_items:
     - rdiff-backup
 
