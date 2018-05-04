@@ -1,0 +1,32 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    ninja:
+      email_to_report: "lyz@gentooza.me"
+      backup_retention_period: "60D"
+      backup_method: 'rdiff'
+      include:
+        - "/var/spool/cron/crontabs"
+        - "/var/backups"
+        - "/etc"
+        - "/root"
+        - "/home"
+        - "/usr/local/bin"
+        - "/usr/local/sbin"
+        - "/var/lib/dpkg/status"
+        - "/var/lib/dpkg/status-old"
+      exclude:
+        - "/tmp"
+      temp_backup_dir: "/var/backups/"
+      backup_dir: "/backups"
+      when: "everyday at 13"
+  roles:
+    - role: backupninja
+
+- name: '[Post action] Execute backupninja'
+  hosts: all
+  tasks:
+    - name: 'Execute backupninja'
+      command: 'backupninja -n'
+      changed_when: false

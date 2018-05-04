@@ -1,0 +1,21 @@
+---
+ninja:
+  email_to_report:
+  backup_retention_period: "60D"
+  backup_method: 'rdiff'
+  include:
+    - "/var/spool/cron/crontabs"
+    - "/var/backups"
+    - "/etc"
+    - "/root"
+    - "/home"
+    - "/usr/local/bin"
+    - "/usr/local/sbin"
+    - "/var/lib/dpkg/status"
+    - "/var/lib/dpkg/status-old"
+  exclude:
+    - "/tmp"
+  temp_backup_dir: "/var/backups/"
+  backup_dir: "/backups/"
+
+  when: "everyday at 02"
