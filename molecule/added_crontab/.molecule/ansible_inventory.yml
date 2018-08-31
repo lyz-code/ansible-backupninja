@@ -1,0 +1,11 @@
+# Molecule managed
+
+---
+all:
+  hosts:
+    backupninja_debian_stretch: &id001
+      ansible_connection: docker
+ungrouped:
+  hosts:
+    backupninja_debian_stretch: *id001
+  vars: {}
