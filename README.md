@@ -19,6 +19,8 @@ Role Variables
   * `temp_backup_dir`: The directory where the temporal files for the backup
     are going to be stored
   * `backup_dir`: The directory where the backup is going to be stored
+  * `execute_hourly`: Set to `True` if you want to run `backupninja` hourly
+    (Default: `False`)
 
 Dependencies
 ------------

@@ -1,0 +1,20 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+lint:
+  name: yamllint
+platforms:
+  - name: backupninja_debian_stretch
+    image: debian:stretch
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+scenario:
+  name: added_crontab
+verifier:
+  name: testinfra
+  lint:
+    name: flake8
