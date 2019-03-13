@@ -23,7 +23,6 @@
     state: present
   with_items:
     - backupninja
-    - postfix
 
 - name: Install Backupninja sys mode related packages
   become: "True"
