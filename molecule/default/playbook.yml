@@ -19,6 +19,7 @@
       exclude:
         - "/tmp"
       temp_backup_dir: "/var/backups/"
+      execute_hourly: false
       backup_dir: "/backups"
       when: "everyday at 13"
   roles:

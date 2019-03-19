@@ -17,6 +17,6 @@ ninja:
     - "/tmp"
   temp_backup_dir: "/var/backups/"
   backup_dir: "/backups/"
-  execute_hourly: "False"
+  execute_hourly: false
 
   when: "everyday at 02"
