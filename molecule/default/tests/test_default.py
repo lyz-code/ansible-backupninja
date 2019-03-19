@@ -12,7 +12,6 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     ("debconf-utils"),
     ("flashrom"),
     ("rdiff-backup"),
-    ("postfix"),
 ])
 def test_required_packages_are_installed(host, package):
     assert host.package(package).is_installed
