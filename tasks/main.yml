@@ -85,6 +85,16 @@
     group: root
   when: ninja.backup_method == 'rdiff'
 
+- name: Include extra backup steps
+  become: "True"
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/backupninja/{{ ninja.backup_name }}/backup.d/"
+    mode: '0700'
+    owner: root
+    group: root
+  with_items: "{{ ninja.include_backup_steps }}"
+
 - name: Set up the cron hourly
   become: "True"
   cron:

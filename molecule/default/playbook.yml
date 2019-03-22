@@ -24,6 +24,8 @@
       when: "everyday at 13"
       include_sys_checks: true
       backup_name: main
+      include_backup_steps:
+        - 30.script.sh
   roles:
     - role: backupninja
 

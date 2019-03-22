@@ -20,4 +20,5 @@ ninja:
   backup_dir: "/backups/"
   execute_hourly: false
   include_sys_checks: true
+  include_backup_steps: []
   when: "everyday at 02"

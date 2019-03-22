@@ -102,3 +102,19 @@ def test_ninja_rdiff_worked(host):
     assert file.user == 'root'
     assert file.group == 'root'
     assert oct(file.mode) == '0755'
+
+
+def test_ninja_additional_scripts_configured(host):
+    file = host.file('/etc/backupninja/main/backup.d/30.script.sh')
+    assert file.exists
+    assert file.user == 'root'
+    assert file.group == 'root'
+    assert oct(file.mode) == '0700'
+
+
+def test_ninja_additional_scripts_worked(host):
+    file = host.file('/backups/test.script')
+    assert file.exists
+    assert file.user == 'root'
+    assert file.group == 'root'
+    assert oct(file.mode) == '0600'
