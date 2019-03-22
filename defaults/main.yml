@@ -1,5 +1,6 @@
 ---
 ninja:
+  backup_name: main
   email_to_report:
   backup_retention_period: "60D"
   backup_method: 'rdiff'
@@ -18,5 +19,6 @@ ninja:
   temp_backup_dir: "/var/backups/"
   backup_dir: "/backups/"
   execute_hourly: false
-
+  include_sys_checks: true
+  include_backup_steps: []
   when: "everyday at 02"

@@ -17,6 +17,18 @@ def test_required_packages_are_installed(host, package):
     assert host.package(package).is_installed
 
 
+@pytest.mark.parametrize("original_files", [
+    ("/etc/backup.d"),
+    ("/etc/backupninja.conf"),
+])
+def test_default_backupninja_files_and_directories_deleted(
+    host,
+    original_files
+):
+    file = host.file(original_files)
+    assert not file.exists
+
+
 @pytest.mark.parametrize("directories", [
     ("/backups"),
     ("/var/backups"),
@@ -26,11 +38,11 @@ def test_required_directories_exist(host, directories):
     assert file.exists
     assert file.user == 'root'
     assert file.group == 'root'
-    assert oct(file.mode) == '0755'
+    assert oct(file.mode) == '0700'
 
 
 def test_ninja_global_config(host):
-    file = host.file('/etc/backupninja.conf')
+    file = host.file('/etc/backupninja/main/backupninja.conf')
     assert file.exists
     assert file.user == 'root'
     assert file.group == 'root'
@@ -40,7 +52,7 @@ def test_ninja_global_config(host):
 
 
 def test_ninja_sys_backup_config(host):
-    file = host.file('/etc/backup.d/10.sys')
+    file = host.file('/etc/backupninja/main/backup.d/10.sys')
     assert file.exists
     assert file.user == 'root'
     assert file.group == 'root'
@@ -62,7 +74,7 @@ def test_ninja_sys_files_were_created_(host, sys_files):
 
 
 def test_ninja_rdiff_backup_config(host):
-    file = host.file('/etc/backup.d/20.rdiff')
+    file = host.file('/etc/backupninja/main/backup.d/80.rdiff')
     assert file.exists
     assert file.user == 'root'
     assert file.group == 'root'
@@ -90,3 +102,19 @@ def test_ninja_rdiff_worked(host):
     assert file.user == 'root'
     assert file.group == 'root'
     assert oct(file.mode) == '0755'
+
+
+def test_ninja_additional_scripts_configured(host):
+    file = host.file('/etc/backupninja/main/backup.d/30.script.sh')
+    assert file.exists
+    assert file.user == 'root'
+    assert file.group == 'root'
+    assert oct(file.mode) == '0700'
+
+
+def test_ninja_additional_scripts_worked(host):
+    file = host.file('/backups/test.script')
+    assert file.exists
+    assert file.user == 'root'
+    assert file.group == 'root'
+    assert oct(file.mode) == '0600'

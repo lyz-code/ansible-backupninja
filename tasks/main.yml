@@ -1,20 +1,5 @@
 ---
 # tasks file for backupninja
-- name: Check mandatory variables
-  fail:
-    msg: "Variable {{ item }} has a wrong configuration"
-  with_items:
-    - "{{ ninja.email_to_report | default([]) }}"
-
-    - "{{ ninja.backupname | default([]) }}"
-    - "{{ ninja.backupdir | default([]) }}"
-    - "{{ ninja.root_backupdir | default([]) }}"
-    - "{{ ninja.root_includes | default([]) }}"
-    - "{{ ninja.gpg_user | default([]) }}"
-    - "{{ ninja.shared_folder | default([]) }}"
-  when:
-    - item == ""
-
 - name: Install Backupninja
   become: "True"
   package:
@@ -23,6 +8,15 @@
     state: present
   with_items:
     - backupninja
+
+- name: Delete backupninja default files and directories
+  become: "True"
+  file:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - "/etc/backup.d"
+    - "/etc/backupninja.conf"
 
 - name: Install Backupninja sys mode related packages
   become: "True"
@@ -34,6 +28,7 @@
     - hwinfo
     - debconf-utils
     - flashrom
+  when: ninja.include_sys_checks
 
 - name: Install Backupninja rdiff mode related packages
   become: "True"
@@ -43,13 +38,21 @@
     use: "apt"
   with_items:
     - rdiff-backup
+  when: ninja.backup_method == 'rdiff'
 
 - name: Create required directories
   become: "True"
   file:
     name: "{{ item }}"
     state: directory
+    owner: root
+    group: root
+    mode: 0700
   with_items:
+    - "/etc/backupninja/"
+    - "/etc/backupninja/{{ ninja.backup_name }}"
+    - "/etc/backupninja/{{ ninja.backup_name }}/backup.d"
+    - "/var/log/backupninja/"
     - "{{ ninja.backup_dir }}"
     - "{{ ninja.temp_backup_dir }}"
 
@@ -57,7 +60,7 @@
   become: "True"
   template:
     src: backupninja.conf.j2
-    dest: "/etc/backupninja.conf"
+    dest: "/etc/backupninja/{{ ninja.backup_name }}/backupninja.conf"
     mode: '0600'
     owner: root
     group: root
@@ -66,25 +69,36 @@
   become: "True"
   template:
     src: sys.j2
-    dest: "/etc/backup.d/10.sys"
+    dest: "/etc/backupninja/{{ ninja.backup_name }}/backup.d/10.sys"
     mode: '0600'
     owner: root
     group: root
+  when: ninja.include_sys_checks
 
 - name: Deploy directories backup template
   become: "True"
   template:
     src: rdiff.j2
-    dest: "/etc/backup.d/20.rdiff"
+    dest: "/etc/backupninja/{{ ninja.backup_name }}/backup.d/80.rdiff"
     mode: '0600'
     owner: root
     group: root
   when: ninja.backup_method == 'rdiff'
+
+- name: Include extra backup steps
+  become: "True"
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/backupninja/{{ ninja.backup_name }}/backup.d/"
+    mode: '0700'
+    owner: root
+    group: root
+  with_items: "{{ ninja.include_backup_steps }}"
 
 - name: Set up the cron hourly
   become: "True"
   cron:
     name: "Execute backupninja hourly"
     special_time: hourly
-    job: "/usr/sbin/backupninja -n"
+    job: "/usr/sbin/backupninja -f /etc/backupninja/{{ ninja.backup_name }}/backupninja.conf -n"
   when: ninja.execute_hourly
