@@ -22,6 +22,8 @@
       execute_hourly: false
       backup_dir: "/backups"
       when: "everyday at 13"
+      include_sys_checks: true
+      backup_name: main
   roles:
     - role: backupninja
 
@@ -29,5 +31,5 @@
   hosts: all
   tasks:
     - name: 'Execute backupninja'
-      command: 'backupninja -n'
+      command: 'backupninja -f /etc/backupninja/main/backupninja.conf -n'
       changed_when: false
