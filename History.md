@@ -1,4 +1,11 @@
 
+1.2.0 / 2019-03-22
+==================
+
+  * Add support for external backup steps
+  * Support more than one backup configuration
+  * Support the disabling of the sys checks with the include_sys_checks flag
+
 1.1.2 / 2019-03-19
 ==================
 
