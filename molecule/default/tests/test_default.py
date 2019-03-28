@@ -118,3 +118,12 @@ def test_ninja_additional_scripts_worked(host):
     assert file.user == 'root'
     assert file.group == 'root'
     assert oct(file.mode) == '0600'
+
+
+def test_ninja_system_cron_configured(host):
+    file = host.file('/etc/cron.d/backupninja')
+    assert file.exists
+    assert file.user == 'root'
+    assert file.group == 'root'
+    assert oct(file.mode) == '0644'
+    assert file.contains("/usr/sbin/backupninja -f /etc/backupninja/main")
