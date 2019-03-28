@@ -95,6 +95,15 @@
     group: root
   with_items: "{{ ninja.include_backup_steps }}"
 
+- name: Set up the system cron
+  become: "True"
+  template:
+    src: backupcron.j2
+    dest: /etc/cron.d/backupninja
+    owner: root
+    group: root
+    mode: '0644'
+
 - name: Set up the cron hourly
   become: "True"
   cron:
