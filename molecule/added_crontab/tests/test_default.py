@@ -5,17 +5,41 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
+# Escenario without:
+# * System checks
+# * Additional scripts
+#
+# Escenario with:
+# * Execute job hourly
+
 
 @pytest.mark.parametrize("package", [
     ("backupninja"),
-    ("hwinfo"),
-    ("debconf-utils"),
-    ("flashrom"),
     ("rdiff-backup"),
-    ("postfix"),
 ])
 def test_required_packages_are_installed(host, package):
     assert host.package(package).is_installed
+
+
+@pytest.mark.parametrize("package", [
+    ("hwinfo"),
+    ("debconf-utils"),
+    ("flashrom"),
+])
+def test_unrequired_packages_are_not_installed(host, package):
+    assert not host.package(package).is_installed
+
+
+@pytest.mark.parametrize("original_files", [
+    ("/etc/backup.d"),
+    ("/etc/backupninja.conf"),
+])
+def test_default_backupninja_files_and_directories_deleted(
+    host,
+    original_files
+):
+    file = host.file(original_files)
+    assert not file.exists
 
 
 @pytest.mark.parametrize("directories", [
@@ -27,11 +51,11 @@ def test_required_directories_exist(host, directories):
     assert file.exists
     assert file.user == 'root'
     assert file.group == 'root'
-    assert oct(file.mode) == '0755'
+    assert oct(file.mode) == '0700'
 
 
 def test_ninja_global_config(host):
-    file = host.file('/etc/backupninja.conf')
+    file = host.file('/etc/backupninja/main/backupninja.conf')
     assert file.exists
     assert file.user == 'root'
     assert file.group == 'root'
@@ -41,11 +65,8 @@ def test_ninja_global_config(host):
 
 
 def test_ninja_sys_backup_config(host):
-    file = host.file('/etc/backup.d/10.sys')
-    assert file.exists
-    assert file.user == 'root'
-    assert file.group == 'root'
-    assert oct(file.mode) == '0600'
+    file = host.file('/etc/backupninja/main/backup.d/10.sys')
+    assert not file.exists
 
 
 @pytest.mark.parametrize("sys_files", [
@@ -56,14 +77,11 @@ def test_ninja_sys_backup_config(host):
 ])
 def test_ninja_sys_files_were_created_(host, sys_files):
     file = host.file(sys_files)
-    assert file.exists
-    assert file.user == 'root'
-    assert file.group == 'root'
-    assert oct(file.mode) == '0600'
+    assert not file.exists
 
 
 def test_ninja_rdiff_backup_config(host):
-    file = host.file('/etc/backup.d/20.rdiff')
+    file = host.file('/etc/backupninja/main/backup.d/80.rdiff')
     assert file.exists
     assert file.user == 'root'
     assert file.group == 'root'
@@ -93,7 +111,21 @@ def test_ninja_rdiff_worked(host):
     assert oct(file.mode) == '0755'
 
 
+def test_ninja_system_cron_configured(host):
+    file = host.file('/etc/cron.d/backupninja')
+    assert file.exists
+    assert file.user == 'root'
+    assert file.group == 'root'
+    assert oct(file.mode) == '0644'
+    assert file.contains(
+        "@hourly root /usr/sbin/backupninja -f /etc/backupninja/main"
+    )
+
+
 def test_crontab_configured(host):
     with host.sudo():
         crontab = host.check_output('crontab -l')
-        assert '@hourly /usr/sbin/backupninja -n' in crontab
+        assert \
+            '@hourly /usr/sbin/backupninja ' + \
+            '-f /etc/backupninja/main/backupninja.conf -n' \
+            in crontab
