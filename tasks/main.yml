@@ -97,12 +97,12 @@
 
 - name: Set up the system cron
   become: "True"
-  template:
-    src: backupcron.j2
-    dest: /etc/cron.d/backupninja
-    owner: root
-    group: root
-    mode: '0644'
+  cron:
+    name: "Execute {{ ninja.backup_name }} backupninja job"
+    cron_file: /etc/cron.d/backupninja
+    special_time: hourly
+    user: root
+    job: "/usr/sbin/backupninja -f /etc/backupninja/{{ ninja.backup_name }}/backupninja.conf"
 
 - name: Set up the cron hourly
   become: "True"
