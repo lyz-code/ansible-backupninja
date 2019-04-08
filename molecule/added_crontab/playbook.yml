@@ -19,9 +19,12 @@
       exclude:
         - "/tmp"
       temp_backup_dir: "/var/backups/"
+      execute_hourly: true
       backup_dir: "/backups"
       when: "everyday at 13"
-      execute_hourly: "True"
+      include_sys_checks: false
+      backup_name: main
+      include_backup_steps: []
   roles:
     - role: backupninja
 
@@ -29,5 +32,5 @@
   hosts: all
   tasks:
     - name: 'Execute backupninja'
-      command: 'backupninja -n'
+      command: 'backupninja -f /etc/backupninja/main/backupninja.conf -n'
       changed_when: false

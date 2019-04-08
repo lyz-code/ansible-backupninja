@@ -1,4 +1,10 @@
 
+1.2.2 / 2019-04-08
+==================
+
+  * Correct add_crontab tests
+  * Correct crontab invocation
+
 1.2.1 / 2019-03-28
 ==================
 

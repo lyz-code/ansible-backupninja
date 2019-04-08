@@ -126,4 +126,6 @@ def test_ninja_system_cron_configured(host):
     assert file.user == 'root'
     assert file.group == 'root'
     assert oct(file.mode) == '0644'
-    assert file.contains("/usr/sbin/backupninja -f /etc/backupninja/main")
+    assert file.contains(
+        "@hourly root /usr/sbin/backupninja -f /etc/backupninja/main"
+    )
