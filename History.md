@@ -1,4 +1,11 @@
 
+1.2.3 / 2020-02-07
+==================
+
+  * Update sys handler to fix partition backup bug
+  * Disable bios
+  * Update role
+
 1.2.2 / 2019-04-08
 ==================
 
