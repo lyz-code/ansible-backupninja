@@ -11,6 +11,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     ("hwinfo"),
     ("debconf-utils"),
     ("flashrom"),
+    ("lvm2"),
     ("rdiff-backup"),
 ])
 def test_required_packages_are_installed(host, package):
@@ -38,7 +39,7 @@ def test_required_directories_exist(host, directories):
     assert file.exists
     assert file.user == 'root'
     assert file.group == 'root'
-    assert oct(file.mode) == '0700'
+    assert oct(file.mode) == '0o700'
 
 
 def test_ninja_global_config(host):
@@ -46,7 +47,7 @@ def test_ninja_global_config(host):
     assert file.exists
     assert file.user == 'root'
     assert file.group == 'root'
-    assert oct(file.mode) == '0600'
+    assert oct(file.mode) == '0o600'
     assert file.contains('reportemail = lyz@gentooza.me')
     assert file.contains('when = everyday at 13')
 
@@ -56,7 +57,9 @@ def test_ninja_sys_backup_config(host):
     assert file.exists
     assert file.user == 'root'
     assert file.group == 'root'
-    assert oct(file.mode) == '0600'
+    assert oct(file.mode) == '0o600'
+    # BIOS backup will fail in most systems
+    assert file.contains('bios = no')
 
 
 @pytest.mark.parametrize("sys_files", [
@@ -70,7 +73,7 @@ def test_ninja_sys_files_were_created_(host, sys_files):
     assert file.exists
     assert file.user == 'root'
     assert file.group == 'root'
-    assert oct(file.mode) == '0600'
+    assert oct(file.mode) == '0o600'
 
 
 def test_ninja_rdiff_backup_config(host):
@@ -78,7 +81,7 @@ def test_ninja_rdiff_backup_config(host):
     assert file.exists
     assert file.user == 'root'
     assert file.group == 'root'
-    assert oct(file.mode) == '0600'
+    assert oct(file.mode) == '0o600'
     assert file.contains('nicelevel = 19')
     assert file.contains('label = backupninja_debian_stretch')
     assert file.contains('type = local')
@@ -101,7 +104,7 @@ def test_ninja_rdiff_worked(host):
     assert file.exists
     assert file.user == 'root'
     assert file.group == 'root'
-    assert oct(file.mode) == '0755'
+    assert oct(file.mode) == '0o755'
 
 
 def test_ninja_additional_scripts_configured(host):
@@ -109,7 +112,7 @@ def test_ninja_additional_scripts_configured(host):
     assert file.exists
     assert file.user == 'root'
     assert file.group == 'root'
-    assert oct(file.mode) == '0700'
+    assert oct(file.mode) == '0o700'
 
 
 def test_ninja_additional_scripts_worked(host):
@@ -117,7 +120,7 @@ def test_ninja_additional_scripts_worked(host):
     assert file.exists
     assert file.user == 'root'
     assert file.group == 'root'
-    assert oct(file.mode) == '0600'
+    assert oct(file.mode) == '0o600'
 
 
 def test_ninja_system_cron_configured(host):
@@ -125,7 +128,18 @@ def test_ninja_system_cron_configured(host):
     assert file.exists
     assert file.user == 'root'
     assert file.group == 'root'
-    assert oct(file.mode) == '0644'
+    assert oct(file.mode) == '0o644'
     assert file.contains(
         "@hourly root /usr/sbin/backupninja -f /etc/backupninja/main"
+    )
+
+
+def test_sys_handler_is_updated(host):
+    file = host.file('/usr/share/backupninja/sys')
+    assert file.exists
+    assert file.user == 'root'
+    assert file.group == 'root'
+    assert oct(file.mode) == '0o644'
+    assert file.contains(
+        'info "The device $dev does not appear to have any partitions"'
     )

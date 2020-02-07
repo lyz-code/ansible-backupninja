@@ -8,6 +8,7 @@
     state: present
   with_items:
     - backupninja
+    - lvm2
 
 - name: Delete backupninja default files and directories
   become: "True"
@@ -94,6 +95,18 @@
     owner: root
     group: root
   with_items: "{{ ninja.include_backup_steps }}"
+
+# This step fixes the [Dump partition Warning](
+# https://0xacab.org/riseuplabs/backupninja/merge_requests/22)
+#
+- name: Update the sys handler
+  become: "True"
+  copy:
+    src: "sys"
+    dest: "/usr/share/backupninja/"
+    mode: '0644'
+    owner: root
+    group: root
 
 - name: Set up the system cron
   become: "True"
